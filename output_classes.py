@@ -88,7 +88,7 @@ class _mm(object):
             print "Bond energy:\t\t\t" + str(self.ebond[-1]) + " kcal/mol"
             print "Angle energy:\t\t\t" + str(self.eangle[-1]) + " kcal/mol"
             print "Urey-Bradly energy:\t\t" + str(self.eureybrad[-1]) + " kcal/mol"
-            print "Improper rotation energy:\t" + str(self.eimptors[-1]) + " kcal/mol"
+            print "Improper rotation_projection energy:\t" + str(self.eimptors[-1]) + " kcal/mol"
             print "Torsion energy:\t\t\t" + str(self.etorsion[-1]) + " kcal/mol"
             print "van der Waals energy:\t\t" + str(self.evdw[-1]) + " kcal/mol"
             print "Coulomb energy:\t\t\t" + str(self.ecoulomb[-1]) + " kcal/mol"
@@ -100,7 +100,7 @@ class _mm(object):
             print "Bond energy:\t\t\t" + str(self.ebond) + " kcal/mol"
             print "Angle energy:\t\t\t" + str(self.eangle) + " kcal/mol"
             print "Urey-Bradly energy:\t\t" + str(self.eureybrad) + " kcal/mol"
-            print "Improper rotation energy:\t" + str(self.eimptors) + " kcal/mol"
+            print "Improper rotation_projection energy:\t" + str(self.eimptors) + " kcal/mol"
             print "Torsion energy:\t\t\t" + str(self.etorsion) + " kcal/mol"
             print "van der Waals energy:\t\t" + str(self.evdw) + " kcal/mol"
             print "Coulomb energy:\t\t\t" + str(self.ecoulomb) + " kcal/mol"
@@ -158,7 +158,7 @@ class _general(object):
 
 class _thermo(object):
     '''
-    This structure contains thermodynamics information obtained from a frequency calculation.
+    This structure contains thermochem information obtained from a frequency calculation.
     '''
 
     def __init__(self,E,ZPE,ITE,T,p,S,H,F,G,frequencies,intensities,mass,mom_inertia,rot_sym,linear_switch):
@@ -180,7 +180,7 @@ class _thermo(object):
 
     def info(self):
         '''
-        Prints a summary of basic thermodynamics information (in Hartree).
+        Prints a summary of basic thermochem information (in Hartree).
         The internal thermal energy (ITE) is corrected for zero point energy (ZPE). 
         Enthalpy (H), Helmholtz free energy (F) and Gibbs free energy (G) are 
         already corrected for internal thermal energy (which includes zero point energy). 

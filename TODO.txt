@@ -1,0 +1,7 @@
+TODO: Molecule object:
+
+1. Make "to_molden_format" to also add Normal modes data.
+
+TODO: general
+
+1. Think about orbital data

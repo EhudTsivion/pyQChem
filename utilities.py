@@ -312,7 +312,7 @@ def _readinput(file_input,silent=False):
 #SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 def fit(P, Q):
-    """ Varies the distance between P and Q, and optimizes rotation for each step
+    """ Varies the distance between P and Q, and optimizes rotation_projection for each step
     until a minimum is found.
     """
     step_size = P.max(0)
@@ -361,9 +361,9 @@ def kabsch(P, Q):
     The algorithm works in three steps:
     - a translation of P and Q
     - the computation of a covariance matrix C
-    - computation of the optimal rotation matrix U
+    - computation of the optimal rotation_projection matrix U
 
-    The optimal rotation matrix U is then used to
+    The optimal rotation_projection matrix U is then used to
     rotate P unto Q so the RMSD can be caculated
     from a straight forward fashion.
 
@@ -372,12 +372,12 @@ def kabsch(P, Q):
     # Computation of the covariance matrix
     C = numpy.dot(numpy.transpose(P), Q)
 
-    # Computation of the optimal rotation matrix
+    # Computation of the optimal rotation_projection matrix
     # This can be done using singular value decomposition (SVD)
     # Getting the sign of the det(V)*(W) to decide
-    # whether we need to correct our rotation matrix to ensure a
+    # whether we need to correct our rotation_projection matrix to ensure a
     # right-handed coordinate system.
-    # And finally calculating the optimal rotation matrix U
+    # And finally calculating the optimal rotation_projection matrix U
     # see http://en.wikipedia.org/wiki/Kabsch_algorithm
     V, S, W = numpy.linalg.svd(C)
     d = (numpy.linalg.det(V) * numpy.linalg.det(W)) < 0.0
@@ -408,9 +408,9 @@ def kabsch2(Q, P):
     The algorithm works in three steps:
     - a translation of P and Q
     - the computation of a covariance matrix C
-    - computation of the optimal rotation matrix U
+    - computation of the optimal rotation_projection matrix U
 
-    The optimal rotation matrix U is then used to
+    The optimal rotation_projection matrix U is then used to
     rotate P unto Q so the RMSD can be caculated
     from a straight forward fashion.
 
@@ -419,12 +419,12 @@ def kabsch2(Q, P):
     # Computation of the covariance matrix
     C = numpy.dot(numpy.transpose(P), Q)
 
-    # Computation of the optimal rotation matrix
+    # Computation of the optimal rotation_projection matrix
     # This can be done using singular value decomposition (SVD)
     # Getting the sign of the det(V)*(W) to decide
-    # whether we need to correct our rotation matrix to ensure a
+    # whether we need to correct our rotation_projection matrix to ensure a
     # right-handed coordinate system.
-    # And finally calculating the optimal rotation matrix U
+    # And finally calculating the optimal rotation_projection matrix U
     # see http://en.wikipedia.org/wiki/Kabsch_algorithm
     V, S, W = numpy.linalg.svd(C)
     d = (numpy.linalg.det(V) * numpy.linalg.det(W)) < 0.0

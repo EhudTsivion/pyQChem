@@ -779,7 +779,7 @@ class rem_array(_array):
 
 
     def cc_qccd_theta_switch(self,value="show"):
-        '''\nName: CC_QCCD_THETA_SWITCH\nType: INTEGER\nDefault: 0\nOptions: 2   \nDescription: QCCD calculations switch from OD to QCCD when the rotation gradient is below this threshold [10-n]\n    '''
+        '''\nName: CC_QCCD_THETA_SWITCH\nType: INTEGER\nDefault: 0\nOptions: 2   \nDescription: QCCD calculations switch from OD to QCCD when the rotation_projection gradient is below this threshold [10-n]\n    '''
         if value == "":
             if "CC_QCCD_THETA_SWITCH" in self.dict_of_keywords:
                 del self.dict_of_keywords["CC_QCCD_THETA_SWITCH"]
@@ -914,7 +914,7 @@ class rem_array(_array):
 
 
     def cc_theta_conv(self,value="show"):
-        '''\nName: CC_THETA_CONV\nType: INTEGER\nDefault: 0\nOptions: 5 \nDescription: Convergence criterion on the RMS difference between successive sets of  orbital rotation angles [10-n].\nRecommendation: : Use default    '''
+        '''\nName: CC_THETA_CONV\nType: INTEGER\nDefault: 0\nOptions: 5 \nDescription: Convergence criterion on the RMS difference between successive sets of  orbital rotation_projection angles [10-n].\nRecommendation: : Use default    '''
         if value == "":
             if "CC_THETA_CONV" in self.dict_of_keywords:
                 del self.dict_of_keywords["CC_THETA_CONV"]
@@ -929,7 +929,7 @@ class rem_array(_array):
 
 
     def cc_theta_grad_conv(self,value="show"):
-        '''\nName: CC_THETA_GRAD_CONV\nType: INTEGER\nDefault: 0\nOptions: 7   \nDescription: Convergence desired on the RMS gradient of the energy with respect to   orbital rotation angles [10-n]. \nRecommendation: : Use default    '''
+        '''\nName: CC_THETA_GRAD_CONV\nType: INTEGER\nDefault: 0\nOptions: 7   \nDescription: Convergence desired on the RMS gradient of the energy with respect to   orbital rotation_projection angles [10-n]. \nRecommendation: : Use default    '''
         if value == "":
             if "CC_THETA_GRAD_CONV" in self.dict_of_keywords:
                 del self.dict_of_keywords["CC_THETA_GRAD_CONV"]
@@ -2557,7 +2557,7 @@ Recommentation: Use default unless convergence problems arise, in which case it 
 
 
     def cc_theta_stepsize(self,value="show"):
-        '''\nName: CC_THETA_STEPSIZE\nType: INTEGER\nDefault: 2\nOptions: 0:::\nDescription: Scale factor for the orbital rotation step size. The optimal rotation steps should be approximately equal to the gradient vector.\nRecommendation: : Try a smaller value in cases of poor convergence and very large orbital gradients. For example, a value of 01001 translates to 0.1    '''
+        '''\nName: CC_THETA_STEPSIZE\nType: INTEGER\nDefault: 2\nOptions: 0:::\nDescription: Scale factor for the orbital rotation_projection step size. The optimal rotation_projection steps should be approximately equal to the gradient vector.\nRecommendation: : Try a smaller value in cases of poor convergence and very large orbital gradients. For example, a value of 01001 translates to 0.1    '''
         if value == "":
             if "CC_THETA_STEPSIZE" in self.dict_of_keywords:
                 del self.dict_of_keywords["CC_THETA_STEPSIZE"]
@@ -3326,7 +3326,7 @@ Recommentation: Use default unless convergence problems arise, in which case it 
 
 
     def cc_canonize_frequency(self,value="show"):
-        '''\nName: CC_CANONIZE_FREQUENCY\nType: INTEGER\nDefault: 2\nOptions: 1:100:50:1\nDescription: The orbitals will be semi-canonicalized every n theta resets. The thetas (orbital rotation angles) are reset every CC_RESET_THETA iterations. The counting of iterations differs for active space (VOD, VQCCD) calculations, where the orbitals are always canonicalized at the first theta-reset.\nRecommendation: : Smaller values can be tried in cases that do not converge.    '''
+        '''\nName: CC_CANONIZE_FREQUENCY\nType: INTEGER\nDefault: 2\nOptions: 1:100:50:1\nDescription: The orbitals will be semi-canonicalized every n theta resets. The thetas (orbital rotation_projection angles) are reset every CC_RESET_THETA iterations. The counting of iterations differs for active space (VOD, VQCCD) calculations, where the orbitals are always canonicalized at the first theta-reset.\nRecommendation: : Smaller values can be tried in cases that do not converge.    '''
         if value == "":
             if "CC_CANONIZE_FREQUENCY" in self.dict_of_keywords:
                 del self.dict_of_keywords["CC_CANONIZE_FREQUENCY"]
