@@ -11,6 +11,7 @@ import tempfile
 import copy
 import os
 import molden_parser
+from atom import Atom
 
 
 class Molecule(object):
@@ -535,14 +536,54 @@ def from_molden(file_name, molden_job_num=1, verbosity=1):
     return mp.molecule
 
 
+def from_xyz(file_name, verbosity=1):
+    """
+    generate a molecule object from xyz formatted file
+
+    :return: a molecule object
+    """
+
+    new_molecule = Molecule()
+
+    f = open(file_name)
+
+    verbprint(1, verbosity, "parsing xyz file {}".format(file_name))
+
+    text = f.readlines()
+
+    read_flag = False
+    atom_counter = 0
+    atom_number = -1
+    skip_line = False
+
+    for line in text:
+        line = line.strip().split()
+
+        if atom_counter - atom_number == 0:
+            break
+
+        elif skip_line:
+            skip_line = False
+            continue
+
+        elif not read_flag:
+            if len(line) == 1:
+                atom_number = int(line[0])
+                read_flag = True
+                skip_line = True
+                verbprint(1, verbosity, "xyz file contains {} atoms".format(atom_number))
+
+        elif read_flag:
+            atom_counter += 1
+            new_atom = Atom(sym=line[0], coords=[line[1], line[2], line[3]],
+                            coord_units="angs")
+            new_molecule.add_atom(new_atom)
+
+    return new_molecule
+
+
 if __name__ == "__main__":
-    mp = molden_parser.MoldenIO('./example_outputs/benzene_opt_freq.qchem')
-    molecule = mp.molecule
-    # molecule.to_jmol()
-    molecule.rotate(3, 5, 38, [1, 11, 2, 12])
-    molecule.to_jmol()
-    # molecules = molecule.split([23])
-    # molecules[1].rotate(2, 5, 90)
-    # join(molecules).to_jmol()
+    mp = from_xyz('./example_outputs/NiCl2-PCM18.xyz')
+    mp.to_jmol()
 
 

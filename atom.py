@@ -30,7 +30,8 @@ class Atom(object):
 
         :param sym: chemical symbol of atom
         :param coords: cartesian coordinates of the atom, in units
-        :param coord_units: the units in which coordinates are provided
+        :param coord_units: the units in which coordinates are provided, can
+                be bohr or angstroms, angs, Angs etc.. anthing with first letter 'A'
         """
 
         # make sure chemical symbol has the correct
@@ -49,7 +50,7 @@ class Atom(object):
                 self._xyz = np.array(coords).astype(np.float64)*constants.angstrom_to_bohr
 
         else:
-            exit("error reading the coordinates: \"{}\"".format(coords))
+            raise ValueError("error reading the coordinates: \"{}\"".format(coords))
 
     @property
     def coords(self):
