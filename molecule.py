@@ -11,6 +11,7 @@ import tempfile
 import copy
 import os
 import molden_parser
+import constants as const
 from atom import Atom
 
 
@@ -50,6 +51,8 @@ class Molecule(object):
         # and other stuff
         self.mom_thresh = 1E-5
 
+        self._normal_modes = normal_modes
+
     def add_atom(self, new_atom):
         """
 
@@ -62,7 +65,7 @@ class Molecule(object):
 
         self._atoms.append(copy.deepcopy(new_atom))
 
-    def rotate(self, atom_num1, atom_num2, angle, atom_list=None, radians=False):
+    def rotate(self, atom_num1, atom_num2, angle=0, atom_list=None, radians=False):
         """
 
         counter-clockwise rotation of the molecule around the
@@ -126,7 +129,6 @@ class Molecule(object):
         coord_shift = np.copy(coordinates[atom_num1])
         coordinates -= coord_shift
 
-
         # form the rotation matrix
         # see: http://goo.gl/lUCF3P for wikipedia article
         rot_mat = np.zeros((3, 3), dtype=np.float)
@@ -186,7 +188,7 @@ class Molecule(object):
         position_list = []
 
         for atom in self.atoms:
-            position_list.append(atom._xyz)
+            position_list.append(atom.coords)
 
         positions = np.array(position_list).astype(float)
 
@@ -296,6 +298,7 @@ class Molecule(object):
 
         except ValueError:
             print('there are non-integer values')
+            return
 
         point_list = point_list[point_list > 0]
         point_list = np.unique(point_list)
@@ -358,7 +361,6 @@ class Molecule(object):
 
         return linear
 
-
     def to_jmol(self):
         """
         use JMol to visualize molecule
@@ -378,7 +380,6 @@ class Molecule(object):
             print('cannot find JMOL executable')
 
         jmol_script.close()
-
 
     def to_molden_format(self):
         """
@@ -405,8 +406,7 @@ class Molecule(object):
 
         return output
 
-
-    def to_xyz(self):
+    def to_xyz_format(self):
         """
         Generate an xyz format text with molecular specifications
 
@@ -417,14 +417,45 @@ class Molecule(object):
 
         xyz_output += "{:>5}\n{}\n".format(self.atom_count, "pyQChem output")
 
-        for atom in self.atoms:
-            xyz_output += "{:>5} {:10f} {:10f} {:10f}\n" \
-                .format(atom.symbol,
-                        atom.coords[0],
-                        atom.coords[1],
-                        atom.coords[2])
+        xyz_output += self.xyz
 
         return xyz_output
+
+    def xyz(self, units="bohr"):
+        """
+        write the coordinate of the atoms
+
+        :return: a list of symbols and coordinates (?)
+        """
+
+        xyz_text = ""
+        units = units.lower()
+
+        if units == "bohr" or units == "b":
+            factor = 1
+            units = "Bohr"
+
+        elif units == "angs" \
+                or units == "a" \
+                or units == "angstrom" \
+                or units == "angstroms":
+
+            factor = const.bohr_to_angstrom
+            units = "Angstrom"
+
+        else:
+            raise ValueError("units requested \"{}\" not recognized".format(units))
+
+        verbprint(1, self.verbosity, "writing geometry in {} units".format(units))
+
+        for atom in self.atoms:
+            xyz_text += "{:>5} {:10f} {:10f} {:10f}\n" \
+                .format(atom.symbol,
+                        atom.coords[0] * factor,
+                        atom.coords[1] * factor,
+                        atom.coords[2] * factor)
+
+        return xyz_text
 
 
     def to_file(self, file_name="pyQChem_output", file_format="xyz"):
@@ -466,7 +497,6 @@ class Molecule(object):
         verbprint(1, self.verbosity, "write the file {} to "
                                      "directory {}".format(file_name, os.getcwd()))
 
-
     def __str__(self):
         output = ""
 
@@ -479,7 +509,6 @@ class Molecule(object):
                         atom.coords[2])
 
         return output
-
 
     def __add__(self, other_molecule):
         """
@@ -500,7 +529,6 @@ class Molecule(object):
                 joined_molecule.add_atom(atom)
 
         return joined_molecule
-
 
     def __getitem__(self, item):
         raise Exception("__getitem__ not implemented!")
@@ -531,9 +559,11 @@ def from_molden(file_name, molden_job_num=1, verbosity=1):
     :return: a molecule object
     """
 
-    mp = molden_parser.MoldenIO(file_name)
+    parsed_molden = molden_parser.MoldenIO(file_name,
+                                           molden_job_num=molden_job_num,
+                                           verbosity=verbosity)
 
-    return mp.molecule
+    return parsed_molden.molecule
 
 
 def from_xyz(file_name, verbosity=1):
@@ -584,6 +614,3 @@ def from_xyz(file_name, verbosity=1):
 
 if __name__ == "__main__":
     mp = from_xyz('./example_outputs/NiCl2-PCM18.xyz')
-    mp.to_jmol()
-
-
