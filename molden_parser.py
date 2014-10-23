@@ -6,7 +6,7 @@ __author__ = 'Ehud Tsivion'
 
 import numpy as np
 import os
-from molecule import Molecule
+import molecule
 from thermochem.mode import NMode
 from thermochem.normal_modes import NormalModes
 from atom import Atom
@@ -35,6 +35,8 @@ class MoldenIO:
 
         :returns an initialized Molden object
         """
+
+        self._energy = None
 
         # talk to the user
         verbprint(1, verbosity, '\n{:*^40}'.format(' Molden Format parsing '))
@@ -97,6 +99,13 @@ class MoldenIO:
                 self._normal_modes = get_normal_modes(molden_format, self._frequencies)
                 verbprint(2, verbosity, self._normal_modes)
 
+        if "[GEOCONV]" in molden_format:
+            verbprint(1, verbosity, 'Detected optimization data. ')
+            self._energy = get_last_energy(molden_format)
+            verbprint(2, verbosity, 'energy is {} Hartree'.format(self._energy))
+
+
+
     @property
     def molecule(self):
         return self._atoms
@@ -104,6 +113,16 @@ class MoldenIO:
     @property
     def atoms(self):
         return self._atoms
+
+    @property
+    def energy(self):
+        """
+        return the energy of the molecule.
+        """
+
+        return self._energy
+
+
 
 
 def get_atoms(molden_format):
@@ -117,7 +136,7 @@ def get_atoms(molden_format):
     atoms_start = molden_format.find('[Atoms]')
 
     # new molecule object
-    molecule = Molecule()
+    mol = molecule.Molecule()
 
     if atoms_start == -1:
         raise Exception('[Atoms] section no found in [Molden Format]')
@@ -157,9 +176,9 @@ def get_atoms(molden_format):
             # do not use the atomic mass specification
             # as given by the molden output. It is not
             # accurate enough.
-            molecule.add_atom(Atom(line[0], line[3:6], coord_units=units))
+            mol.add_atom(Atom(line[0], line[3:6], coord_units=units))
 
-    return molecule
+    return mol
 
 
 def get_normal_modes(molden_format, frequency_data):
@@ -263,6 +282,42 @@ def get_frequencies(molden_format):
 
     return freq_array
 
+def get_last_energy(molden_format):
+    """
+    a procedure for extraction the the last energy,
+    in case of geometry optimization
+
+    :param molden_format:  the output file
+    :return: the energy (Hartree units)
+    """
+
+    last_energy = None
+
+    # first, locate the "energy" sections
+    energy_start = molden_format.find('energy')
+
+    if energy_start == -1:
+        raise Exception('\"energy\" section no found in [Molden Format]')
+
+    # start scanning from the start of "energy"
+    lines = molden_format[energy_start + 1:].splitlines()
+
+    # remove redundant first line, which contains the "energy" header
+    lines.pop(0)
+
+    for line in lines:
+
+        line = line.strip()
+        if line == "max-force":
+            break
+
+        else:
+            energy = float(line)
+
+    return energy
+
+
+
 
 def isfloat(text):
     """
@@ -288,5 +343,7 @@ def isfloat(text):
                 return True
 
 if __name__ == "__main__":
-    MoldenIO("../example_outputs/catechol-Mg-3Me-opt-freq.qchem")
+    mol = MoldenIO("./example_outputs/acetylene_opt_freq.qchem")
+    print(mol.energy)
+
 
