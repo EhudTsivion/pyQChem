@@ -49,6 +49,9 @@ class Atom(object):
             if coord_units[0].lower() == "a":
                 self._xyz = np.array(coords).astype(np.float64)*constants.angstrom_to_bohr
 
+            else:
+                self._xyz = np.array(coords).astype(np.float64)
+
         else:
             raise ValueError("error reading the coordinates: \"{}\"".format(coords))
 

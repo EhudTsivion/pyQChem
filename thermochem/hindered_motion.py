@@ -68,19 +68,28 @@ class HNMA(object):
             for frag in self.monomer_list:
                 pass
 
-    def set_complex(self, atom_list):
+    def set_complex(self, atom_nums):
+        """
+        Convert the molecule object into a complex object.
+        The molecule is split
 
-        if self.molecule:
-            self.complex = Complex().from_molecule(self.molecule, atom_list)
 
-        else:
+         for instance, if molecule M has 10 atoms,
+         and atom_nums = [2 , 6, 7]
 
-            print("There is no Molecule object. Cannot split to complex")
-            return None
+         the resulting molecules will be:
+         mol 1: 1, 2
+         mol 2: 3, 4, 5, 6
+         mol 3: 
+
+        :param atom_nums:
+        :return:
+        """
+
 
 
 if __name__ == "__main__":
-    job = HNMA(verbosity=1)
-    job.parse_molden('../example_outputs/catechol-Mg-3Me-opt-freq.qchem', molden_job=2)
-    job.set_complex([24, 4])
-    print(job.normal_nodes)
+    hm = HNMA(verbosity=1)
+    hm.parse_molden('../example_outputs/catechol-Mg-3Me-opt-freq.qchem', molden_job=2)
+    hm.set_complex([24, 4])
+    print(hm.normal_nodes)

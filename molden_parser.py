@@ -11,6 +11,7 @@ from thermochem.mode import NMode
 from thermochem.normal_modes import NormalModes
 from atom import Atom
 from verbosity import verbprint
+import constants as const
 
 
 class MoldenIO:
@@ -80,7 +81,7 @@ class MoldenIO:
         # molecular data is stored in a special "Molecule" object
         if "[Atoms]" in molden_format:
             verbprint(1, verbosity, 'Detected Atomic data. '
-                                    'Parsing geometry (Angstrom units)')
+                                    'Parsing geometry')
             self._atoms = get_atoms(molden_format)
             verbprint(2, verbosity, self._atoms)
 
@@ -123,8 +124,6 @@ class MoldenIO:
         return self._energy
 
 
-
-
 def get_atoms(molden_format):
     """
     extraction of the [Atoms] section from a molden output
@@ -152,8 +151,8 @@ def get_atoms(molden_format):
         units = "ang"
     else:
         units = "bohr"
-        raise Exception('Geometry is stated in Bohr units is not currently supported\n'
-                        'but is very easy to add!')
+        # raise Exception('Geometry is stated in Bohr units is not currently supported\n'
+        #                 'but is very easy to add!')
 
     for line in lines:
 
@@ -177,6 +176,9 @@ def get_atoms(molden_format):
             # as given by the molden output. It is not
             # accurate enough.
             mol.add_atom(Atom(line[0], line[3:6], coord_units=units))
+
+    # if units == "bohr":
+    #     mol.center_of_mass
 
     return mol
 

@@ -84,7 +84,7 @@ class Molecule(object):
         """
 
         if not atom_list:
-            atom_list = np.arange(self.atom_count)
+            raise ValueError("No atoms to be rotated are found")
 
         else:
             # correct user input to start from 0 (not user 1..)
@@ -101,7 +101,7 @@ class Molecule(object):
             raise ValueError("atom index {} is smaller than 1".format(min_num))
 
         verbprint(2, self.verbosity,
-                  "rotate molecule around the axis "
+                  "rotate atoms around the axis "
                   "which goes through: "
                   "\natom {}: {}\natom {}: {}\nby {} degrees/radians"
                   .format(atom_num1, self.atoms[atom_num1],
@@ -155,6 +155,75 @@ class Molecule(object):
 
         # update the locations of the molecule object
         self.positions = coordinates
+
+    def move_atoms(self, atom_num1, atom_num2, distance=0, atom_list=None, units="bohr"):
+        """
+
+        move atoms along the vector formed by connecting atom1 and atom2
+
+        :param distance: The distance in bohr
+
+        :param atom_list: a list of atoms to be rotated
+
+        :param units: can be "Bohr" or "Angstrom", only the first letter is important, not case sensitive
+
+        :return: Changes the internal state (more specifically: the location)
+        of the location of the atoms in atoms_list
+        """
+
+        if not atom_list:
+            raise ValueError("No atoms to be moved are stated")
+
+        else:
+            # correct user input to start from 0 (not user 1..)
+            atom_list = np.array(atom_list, dtype=int)
+            atom_list -= 1
+
+        max_num = max(atom_num1, atom_num2)
+        if max_num > self.atom_count:
+            raise ValueError("atom index {} exceeds the number of atoms in molecule."
+                             .format(max_num))
+
+        min_num = min(atom_num1, atom_num2)
+        if min_num < 1:
+            raise ValueError("atom index {} is smaller than 1".format(min_num))
+
+        verbprint(2, self.verbosity,
+                  "move atoms along the axis "
+                  "which goes through: "
+                  "\natom {}: {}\natom {}: {}\nby {} Bohr/Angstroms"
+                  .format(atom_num1, self.atoms[atom_num1],
+                          atom_num2, self.atoms[atom_num1],
+                          distance))
+
+        # correct the atom numbering to start from 0
+        # since python uses C numbering, which starts at 0 and not 1
+        atom_num1 -= 1
+        atom_num2 -= 1
+
+        if units[0].lower() == 'a':
+            # convert to Bohr
+            distance = distance * const.angstrom_to_bohr
+
+        elif units[0].lower() == 'b':
+            # do nothing
+            pass
+
+        else:
+            raise ValueError("Unit type \"{}\" is not identified".format(units))
+
+        coordinates = self.positions
+
+        # get rotation vector, and normalize
+        move_vec = coordinates[atom_num1] - coordinates[atom_num2]
+        move_vec /= np.linalg.norm(move_vec)
+        move_vec *= distance
+
+        coords = self.positions
+        coords[atom_list] += move_vec
+
+        # update the locations of the molecule object
+        self.positions = coords
 
     @property
     def mass_array(self):
@@ -613,4 +682,6 @@ def from_xyz(file_name, verbosity=1):
 
 
 if __name__ == "__main__":
-    mp = from_xyz('./example_outputs/NiCl2-PCM18.xyz')
+    mp = from_molden('/home/tsivion/Dropbox/abinitio/PCM18/b97d3/orca_H2/r0_l0.molden.input')
+    mp.move_atoms(26, 56, 2, range(25, 31) + range(50, 55), units="bohr")
+    mp.to_jmol()
