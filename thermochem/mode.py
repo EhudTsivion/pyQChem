@@ -15,8 +15,23 @@ class NMode(object):
     """
 
     def __init__(self, coords_list, frequency):
-        self.coordinates = np.array(coords_list).astype(np.float)
+        self._coordinates = np.array(coords_list).astype(np.float)
         self.frequency = frequency
+
+    def select_coordinates(self, key_list):
+        """
+        this procedure is used to remove unwanted frequecny data
+        by keeping only a select number, according to the
+        data in key_list
+
+        :param key_list: a list of coordinate numbers to retain
+        :return: changes the internal variable _coordinates by remove unwanted
+        coordination data
+        """
+
+        if not type(key_list) is list:
+            raise KeyError('please ')
+        self._coordinates = self._coordinates[key_list]
 
     @property
     def velocity(self):
@@ -37,7 +52,7 @@ class NMode(object):
             motion_vector = [speed along x axis, speed along y axis, speed along z axis]
         """
 
-        motion_list = self.coordinates
+        motion_list = self._coordinates
 
         # the velocity vector of this normal mode
         motion_vector = np.array([abs_min(motion_list[:, 0]),
@@ -68,7 +83,7 @@ class NMode(object):
             rotations_vector = [rotation prin. ax. 1, rotation prin. ax. 2, rotation prin. ax. 3]
         """
 
-        motion_list = self.coordinates
+        motion_list = self._coordinates
 
         projected_rotation = np.dot(motion_list, principle_axes)
 
@@ -80,11 +95,25 @@ class NMode(object):
 
     @property
     def size(self):
-        return len(self.coordinates)
+        return len(self._coordinates)
 
+    @property
+    def motions(self):
+        return self._coordinates
+
+    @property
+    def motion_print(self):
+
+        out_text = ""
+
+        for line in self._coordinates:
+            out_text += "{:< .8f} {:< .8f} {:< .8f}\n".format(line[0], line[1], line[2])
+
+        return out_text
 
     def __str__(self):
-        return np.array_str(self.coordinates, precision=8)
+        return "Freq: {}\n{}".format(self.frequency,
+                                     np.array_str(self._coordinates, precision=8))
 
 
 def abs_min(some_array):

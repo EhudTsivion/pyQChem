@@ -24,8 +24,12 @@ class NormalModes(object):
 
     """
 
-    def __init__(self):
-        self._modes_list = []
+    def __init__(self, modes_list=None):
+
+        if not modes_list:
+            self._modes_list = []
+        else:
+            self._modes_list = modes_list
 
     def add_mode(self, mode):
         self._modes_list.append(mode)
@@ -68,4 +72,14 @@ class NormalModes(object):
             text += "NMode {}\n".format(counter)
             text += "{}\n".format(mode)
         return text
+
+    def __iter__(self):
+        for m in self.modes:
+            yield m
+
+    def __len__(self):
+        return self.count
+
+    def __getitem__(self, item):
+        return self._modes_list[item]
 

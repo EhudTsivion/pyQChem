@@ -45,7 +45,10 @@ class Molecule(object):
         self.verbosity = verbosity
 
         # all the *_list variables are managed by getter and setters
-        self._atoms = atoms
+        if type(atoms) == list or not atoms:
+            self._atoms = atoms
+        else:
+            raise TypeError('Wrong error type when setting molecule')
 
         # threshold for a moment of inertia purification
         # and other stuff
@@ -155,6 +158,23 @@ class Molecule(object):
 
         # update the locations of the molecule object
         self.positions = coordinates
+
+    def align_to_prinaxes(self):
+        """
+
+        Change the coordinates of the molecule, to be centered on the center-of-mass
+        and rotated such the cartesian axes are the principle axes of inertia
+
+        """
+
+        # shift coordinates to center of mass
+        self.positions -= self.center_of_mass
+
+        # rotate molecule to align to principal axes
+        self.positions = np.dot(self.positions, self.principal_axes)
+
+
+
 
     def move_atoms(self, atom_num1, atom_num2, distance=0, atom_list=None, units="bohr"):
         """
@@ -275,6 +295,15 @@ class Molecule(object):
             counter += 1
 
     @property
+    def mass(self):
+        """
+        :return: The weight of the molecule in atomic units
+        """
+
+        return self.mass_array.sum()
+
+
+    @property
     def center_of_mass(self):
         """
 
@@ -339,6 +368,18 @@ class Molecule(object):
         moments[moments <= self.mom_thresh] = 0
 
         return moments, principle_axes
+
+    @property
+    def principal_axes(self):
+        """
+        Get the moments of inertia along the principal axes.
+
+        Units of the moments of inertia are amu*bohr**2.
+
+        :returns a 3 x 3 matrix of which the columns are the principle axes of inertia.
+        """
+
+        return self.inertia_tensor[1]
 
     def split(self, atom_number):
         """
@@ -473,6 +514,29 @@ class Molecule(object):
                         atom.coords[2])
             counter += 1
 
+        #also, add normal modes data
+        if self.normal_modes:
+            output += "[FREQ]\n"
+            for freq in self.normal_modes.frequency_array:
+                output += "{}\n".format(freq)
+
+            output += "[FR-COORD]\n"
+
+            for atom in self.atoms:
+                output += "{:>5} {: 10f} {: 10f} {: 10f}\n" \
+                    .format(atom.symbol,
+                            atom.coords[0],
+                            atom.coords[1],
+                            atom.coords[2])
+                counter += 1
+
+            output += "[FR-NORM-COORD]\n"
+            mode_counter = 0
+
+            for mode in self.normal_modes:
+                mode_counter += 1
+                output += "vibration {}\n".format(mode_counter)
+                output += mode.motion_print
         return output
 
     def to_xyz_format(self):
@@ -490,9 +554,9 @@ class Molecule(object):
 
         return xyz_output
 
-    def xyz(self, units="bohr"):
+    def xyz(self, units="angstrom"):
         """
-        write the coordinate of the atoms
+        obtain the coordinate of the atoms
 
         :return: a list of symbols and coordinates (?)
         """
@@ -500,15 +564,11 @@ class Molecule(object):
         xyz_text = ""
         units = units.lower()
 
-        if units == "bohr" or units == "b":
+        if units[0].lower() == "b":
             factor = 1
             units = "Bohr"
 
-        elif units == "angs" \
-                or units == "a" \
-                or units == "angstrom" \
-                or units == "angstroms":
-
+        elif units[0].lower() == "a":
             factor = const.bohr_to_angstrom
             units = "Angstrom"
 
@@ -525,6 +585,13 @@ class Molecule(object):
                         atom.coords[2] * factor)
 
         return xyz_text
+
+    @property
+    def normal_modes(self):
+        if self._normal_modes:
+            return self._normal_modes
+        else:
+            raise Exception('No normal-modes data was assigned for this molecule')
 
 
     def to_file(self, file_name="pyQChem_output", file_format="xyz"):
@@ -566,16 +633,45 @@ class Molecule(object):
         verbprint(1, self.verbosity, "write the file {} to "
                                      "directory {}".format(file_name, os.getcwd()))
 
+    def get_fragment(self, atom_numbers):
+        """
+        This functions returns a Molecule object, which is composed
+        from atoms of the parent molecule
+
+        Data is copied
+
+        :return: a molecule object
+        """
+
+        fragment = Molecule(verbosity=self.verbosity)
+
+        for i in atom_numbers:
+            fragment.add_atom(copy.copy(self.atoms[i]))
+
+        if self.normal_modes:
+
+            fragment._normal_modes = copy.copy(self.normal_modes)
+            for nm in fragment._normal_modes:
+
+                # remove unwanted data from original mode data
+                nm.select_coordinates(atom_numbers)
+
+        return fragment
+
     def __str__(self):
         output = ""
 
-        for atom in self.atoms:
-            output += "{:4} {:.2e} {: e} {: e} {: e}\n" \
-                .format(atom.symbol,
-                        atom.mass,
-                        atom.coords[0],
-                        atom.coords[1],
-                        atom.coords[2])
+        if not self.atoms:
+            raise Exception('There are no atoms in this Molecule object')
+
+        else:
+            for atom in self.atoms:
+                output += "{:4} {:.2e} {: e} {: e} {: e}\n" \
+                    .format(atom.symbol,
+                            atom.mass,
+                            atom.coords[0],
+                            atom.coords[1],
+                            atom.coords[2])
 
         return output
 
@@ -683,5 +779,6 @@ def from_xyz(file_name, verbosity=1):
 
 if __name__ == "__main__":
     mp = from_molden('/home/tsivion/Dropbox/abinitio/PCM18/b97d3/orca_H2/r0_l0.molden.input')
-    mp.move_atoms(26, 56, 2, range(25, 31) + range(50, 55), units="bohr")
-    mp.to_jmol()
+    mp.align_to_prinaxes()
+
+    # mp.to_jmol()

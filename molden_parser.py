@@ -123,6 +123,10 @@ class MoldenIO:
 
         return self._energy
 
+    @property
+    def normal_modes(self):
+        return self._normal_modes
+
 
 def get_atoms(molden_format):
     """
